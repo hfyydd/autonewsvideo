@@ -25,8 +25,7 @@
 # 使用 uv（推荐）
 uv sync
 
-# 或使用 pip
-pip install -e .
+
 ```
 
 ### 配置 API Key
@@ -43,22 +42,7 @@ pip install -e .
    - **模型名称**: 模型名称（如 `kimi-k2-turbo-preview`）
 4. 点击 "保存" 按钮
 
-详细配置说明请查看 [CONFIG_GUIDE.md](CONFIG_GUIDE.md)
 
-#### 方式二：使用环境变量
-
-编辑 `.env` 文件或设置环境变量：
-
-```bash
-# 使用 Kimi API（推荐）
-export AI_API_KEY="your-kimi-api-key"
-export AI_BASE_URL="https://api.moonshot.cn/v1"
-export AI_MODEL="kimi-k2-turbo-preview"
-
-# 也可以使用其他 OpenAI 兼容 API（如通义千问）
-# export AI_BASE_URL="https://dashscope.aliyuncs.com/compatible-mode/v1"
-# export AI_MODEL="qwen-plus"
-```
 
 **获取 Kimi API Key**：
 1. 访问 [Moonshot AI 开放平台](https://platform.moonshot.cn/)
@@ -71,6 +55,11 @@ export AI_MODEL="kimi-k2-turbo-preview"
 
 ```bash
 uv run main.py
+```
+
+### 打包应用
+```bash
+uv run flet build macos --verbose
 ```
 
 ## 📖 使用流程
