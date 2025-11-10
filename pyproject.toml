@@ -1,0 +1,33 @@
+[project]
+name = "autonewsvideo"
+version = "0.1.0"
+description = "自动新闻视频生成器 - 从RSS源到视频的一站式工具"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "flet[all]>=0.28.3",
+    "feedparser>=6.0.11",
+    "pillow>=10.0.0",
+    "moviepy>=1.0.3",
+    "edge-tts>=6.1.0",
+    "openai>=1.0.0",
+    "mutagen>=1.47.0",
+    "requests>=2.31.0",
+    "python-dotenv>=1.2.1",
+    "scipy>=1.16.3",
+    "certifi>=2025.10.5",
+]
+
+[tool.flet]
+# 打包配置
+[tool.flet.build]
+# 确保所有隐藏依赖都被包含
+hidden-imports = [
+    "certifi",
+    "charset_normalizer",
+    "idna",
+    "urllib3",
+    "edge_tts",
+    "mutagen",
+    "scipy",
+]

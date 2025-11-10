@@ -1,0 +1,50 @@
+{
+  "llm": {
+    "api_key": "",
+    "base_url": "https://api.moonshot.cn/v1",
+    "model": "kimi-k2-turbo-preview"
+  },
+  "rss_sources": {
+    "科技新闻": [
+      {
+        "name": "36氪",
+        "url": "https://36kr.com/feed",
+        "default_count": 5
+      },
+      {
+        "name": "IT之家",
+        "url": "https://www.ithome.com/rss/",
+        "default_count": 3
+      },
+      {
+        "name": "少数派",
+        "url": "https://sspai.com/feed",
+        "default_count": 3
+      },
+      {
+        "name": "机器之心",
+        "url": "https://www.jiqizhixin.com/rss",
+        "default_count": 3
+      }
+    ],
+    "财经新闻": [
+      {
+        "name": "华尔街见闻",
+        "url": "https://wallstreetcn.com/feed",
+        "default_count": 5
+      },
+      {
+        "name": "财联社",
+        "url": "https://www.cls.cn/rss",
+        "default_count": 3
+      }
+    ],
+    "国际新闻": [
+      {
+        "name": "BBC中文",
+        "url": "https://feeds.bbci.co.uk/zhongwen/simp/rss.xml",
+        "default_count": 5
+      }
+    ]
+  }
+}

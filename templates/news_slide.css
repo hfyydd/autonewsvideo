@@ -1,0 +1,263 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    background-color: #FDF0F0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.slide-container {
+    width: 100%;
+    max-width: 1200px;
+    min-height: 800px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* 主标题样式 */
+.main-title {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.main-title h1 {
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: #E94E8B;
+    letter-spacing: -0.02em;
+}
+
+/* 内容网格布局 */
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    margin-bottom: 60px;
+    flex: 1;
+}
+
+/* 内容框通用样式 */
+.content-box {
+    background-color: white;
+    border-radius: 12px;
+    padding: 30px;
+    border: 2px solid;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.box-black {
+    border-color: #000000;
+}
+
+.box-pink {
+    border-color: #E94E8B;
+}
+
+.box-green {
+    border-color: #4CAF50;
+}
+
+.box-blue {
+    border-color: #2196F3;
+}
+
+.box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.box-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #000000;
+}
+
+.box-icon {
+    font-size: 1.2rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
+
+.icon-code {
+    background-color: #E3F2FD;
+    color: #2196F3;
+}
+
+.icon-flag {
+    background-color: #FCE4EC;
+    color: #E94E8B;
+}
+
+.icon-wrench {
+    background-color: #E8F5E9;
+    color: #4CAF50;
+}
+
+.icon-chart {
+    background-color: #E3F2FD;
+    color: #2196F3;
+}
+
+.box-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #333333;
+    flex: 1;
+}
+
+.highlight-ai {
+    background-color: #E0FFE0;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: 500;
+}
+
+/* 底部区域 */
+.footer-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.footer-text {
+    font-size: 1rem;
+    color: #000000;
+    white-space: nowrap;
+}
+
+.footer-tags {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.footer-tags::-webkit-scrollbar {
+    display: none;
+}
+
+.tag {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.tag-pink {
+    background-color: #E94E8B;
+}
+
+.tag-blue {
+    background-color: #2196F3;
+}
+
+.tag-orange {
+    background-color: #FF9800;
+}
+
+.tag-red {
+    background-color: #F44336;
+}
+
+.tag-green {
+    background-color: #4CAF50;
+}
+
+.tag-purple {
+    background-color: #9C27B0;
+}
+
+.tag-teal {
+    background-color: #009688;
+}
+
+.play-button {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #E0E0E0;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background-color 0.2s;
+}
+
+.play-button:hover {
+    background-color: #D0D0D0;
+}
+
+.play-icon {
+    color: white;
+    font-size: 1.2rem;
+    margin-left: 2px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .main-title h1 {
+        font-size: 2.5rem;
+    }
+
+    .content-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .content-box {
+        padding: 20px;
+    }
+
+    .footer-section {
+        flex-wrap: wrap;
+    }
+
+    .footer-tags {
+        width: 100%;
+        order: 2;
+    }
+
+    .play-button {
+        order: 3;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-title h1 {
+        font-size: 2rem;
+    }
+
+    .box-title {
+        font-size: 1.25rem;
+    }
+
+    .box-text {
+        font-size: 0.9rem;
+    }
+}
+

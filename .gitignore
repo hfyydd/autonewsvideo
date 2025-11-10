@@ -1,0 +1,60 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Output files
+output/images/*.png
+output/audio/*.mp3
+output/videos/*.mp4
+
+# Keep directory structure
+!output/images/.gitkeep
+!output/audio/.gitkeep
+!output/videos/.gitkeep
+
+# API Keys and secrets
+.env
+*.key
+
+# User configuration
+user_config.json
+
+# Fonts (user should download separately)
+assets/fonts/*.ttf
+assets/fonts/*.otf
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+
+# Test files
+123.png
+
+# Environment files (keep .env.example)
+.env.ex
+.env.*
+
+# uv lock file (optional, some projects track it)
+# uv.lock
+
+# Flutter build artifacts
+build/flutter/
+build/macos/
+build/site-packages/
