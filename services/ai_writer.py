@@ -208,6 +208,90 @@ def _generate_mock_content(news: NewsItem) -> Dict[str, any]:
     }
 
 
+def generate_opening_script(news_list: List[NewsItem]) -> str:
+    """
+    生成片头开篇文案
+
+    Args:
+        news_list: 新闻列表
+
+    Returns:
+        开篇文案文本
+    """
+    from datetime import datetime
+
+    # 检查 API Key
+    if not config.AI_API_KEY:
+        print("警告: 未配置 AI_API_KEY，使用模拟开篇文案")
+        return _generate_mock_opening_script(news_list)
+
+    try:
+        client = OpenAI(
+            api_key=config.AI_API_KEY,
+            base_url=config.AI_BASE_URL
+        )
+
+        # 提取所有新闻标题
+        news_titles = []
+        for i, news in enumerate(news_list):
+            title = news.card_title if hasattr(news, 'card_title') and news.card_title else news.title
+            news_titles.append(f"{i+1}. {title}")
+
+        news_titles_text = "\n".join(news_titles)
+        date_str = datetime.now().strftime("%Y年%m月%d日 星期") + ["一", "二", "三", "四", "五", "六", "日"][datetime.now().weekday()]
+
+        prompt = f"""你是专业的新闻播报员。请为以下新闻合集生成一段片头开篇文案。
+
+今天的日期：{date_str}
+
+新闻列表：
+{news_titles_text}
+
+要求：
+1. 60-80字的开篇播报文案
+2. 包含问候语、日期信息
+3. 简要概括今天新闻的主题和亮点
+4. 语言亲切、专业、富有感染力
+5. 适合语音播报，口语化、流畅自然
+6. **纯文本，不包含任何HTML标签、特殊符号、markdown格式**
+
+请直接返回开篇文案文本，不要包含其他内容。"""
+
+        response = client.chat.completions.create(
+            model=config.AI_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+        )
+
+        script = response.choices[0].message.content.strip()
+        script = clean_html_tags(script)
+
+        return script
+
+    except Exception as e:
+        print(f"AI 生成片头文案失败: {e}，使用备用方案")
+        return _generate_mock_opening_script(news_list)
+
+
+def _generate_mock_opening_script(news_list: List[NewsItem]) -> str:
+    """
+    备用方案：简单的开篇文案生成
+
+    Args:
+        news_list: 新闻列表
+
+    Returns:
+        开篇文案
+    """
+    from datetime import datetime
+
+    date_str = datetime.now().strftime("%Y年%m月%d日 星期") + ["一", "二", "三", "四", "五", "六", "日"][datetime.now().weekday()]
+    news_count = len(news_list)
+
+    script = f"各位观众早上好，今天是{date_str}，欢迎收看AI早报。今天我们为您精选了{news_count}条重要新闻，涵盖科技、财经等多个领域。让我们一起来看今天的新闻速览。"
+
+    return script
+
+
 def batch_generate_news_content(news_list: List[NewsItem]) -> List[NewsItem]:
     """
     批量为多条新闻生成内容

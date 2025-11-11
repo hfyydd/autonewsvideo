@@ -147,6 +147,51 @@ async def batch_generate_audio(news_list: list[NewsItem], voice: str = None) -> 
     return news_list
 
 
+async def generate_opening_audio(script: str, voice: str = None, tts_engine: str = None) -> tuple[str, float]:
+    """
+    为片头生成语音
+
+    Args:
+        script: 片头文案
+        voice: 语音类型（默认使用配置中的默认值）
+        tts_engine: TTS引擎 ("edge" 或 "minimax", 默认从配置读取)
+
+    Returns:
+        (audio_path, duration) 音频路径和时长
+    """
+
+    if voice is None:
+        voice = config.TTS_DEFAULT_VOICE
+
+    if not script:
+        raise ValueError("片头文案为空")
+
+    # 确保输出目录存在
+    os.makedirs(config.AUDIO_DIR, exist_ok=True)
+
+    # 输出路径
+    output_path = os.path.join(config.AUDIO_DIR, "opening.mp3")
+
+    # 获取 TTS 引擎配置
+    if tts_engine is None:
+        config_manager = ConfigManager()
+        tts_config = config_manager.get_tts_config()
+        tts_engine = tts_config.get("engine", "edge")
+
+    try:
+        if tts_engine == "minimax":
+            # 使用 MiniMax TTS
+            return await _generate_with_minimax(script, output_path)
+        else:
+            # 使用 Edge TTS (默认)
+            return await _generate_with_edge(script, output_path, voice)
+
+    except Exception as e:
+        print(f"生成片头语音失败: {e}")
+        # 返回一个默认时长（用于测试）
+        return "", 5.0
+
+
 def generate_audio_sync(news: NewsItem, index: int, voice: str = None) -> tuple[str, float]:
     """
     同步版本的语音生成（用于非异步环境）

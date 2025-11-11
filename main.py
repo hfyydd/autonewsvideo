@@ -10,6 +10,9 @@ from services import (
     create_adaptive_news_card,
     compose_news_collection_video,
 )
+from services.ai_writer import generate_opening_script
+from services.tts_service import generate_opening_audio
+from services.image_generator import create_opening_slide
 from services.config_manager import ConfigManager
 
 # 强制导入 certifi 以确保打包时包含
@@ -437,7 +440,8 @@ def main(page: ft.Page):
     async def _generate_video_async(selected_news: List[NewsItem]):
         """异步生成视频的实际逻辑"""
         progress_text.color = ft.Colors.BLUE
-        total_steps = len(selected_news) * 3  # 语音 + 图片 + 视频合成
+        # 更新总步骤：片头（文案+语音+图片） + 新闻内容（语音+图片） + 视频合成
+        total_steps = 3 + len(selected_news) * 2 + len(selected_news)  # 3步片头 + 新闻语音图片 + 合成
         current_step = 0
 
         def update_progress(current, total, message):
@@ -445,6 +449,11 @@ def main(page: ft.Page):
             progress_bar.value = current / total
             progress_text.value = message
             page.update()
+
+        # 片头相关变量
+        opening_image_path = None
+        opening_audio_path = None
+        opening_duration = 0
 
         try:
             # 获取设置
@@ -454,6 +463,37 @@ def main(page: ft.Page):
             tts_config = config_manager.get_tts_config()
             voice_name = tts_config.get("edge_voice", "中文女声")
             voice = config.TTS_VOICES.get(voice_name, config.TTS_DEFAULT_VOICE)
+
+            # === 新增：生成片头 ===
+            # 步骤0.1: 生成片头文案
+            progress_text.value = "正在生成片头文案..."
+            page.update()
+
+            opening_script = generate_opening_script(selected_news)
+
+            current_step += 1
+            progress_bar.value = current_step / total_steps
+            page.update()
+
+            # 步骤0.2: 生成片头语音
+            progress_text.value = "正在生成片头语音..."
+            page.update()
+
+            opening_audio_path, opening_duration = await generate_opening_audio(opening_script, voice)
+
+            current_step += 1
+            progress_bar.value = current_step / total_steps
+            page.update()
+
+            # 步骤0.3: 生成片头图片
+            progress_text.value = "正在生成片头图片..."
+            page.update()
+
+            opening_image_path = create_opening_slide(selected_news, style)
+
+            current_step += 1
+            progress_bar.value = current_step / total_steps
+            page.update()
 
             # 步骤1: 生成语音
             for i, news in enumerate(selected_news):
@@ -480,26 +520,33 @@ def main(page: ft.Page):
                 progress_bar.value = current_step / total_steps
                 page.update()
 
-            # 步骤3: 合成视频（带进度回调）
+            # 步骤3: 合成视频（带进度回调，包含片头）
             def video_progress_callback(current, total, message):
                 """视频合成进度回调"""
                 # 映射到总进度
-                video_base = len(selected_news) * 2  # 前面已完成的步骤
+                video_base = 3 + len(selected_news) * 2  # 片头3步 + 前面已完成的步骤
                 video_progress = current / total if total > 0 else 0
                 overall_progress = (video_base + video_progress * len(selected_news)) / total_steps
                 progress_bar.value = overall_progress
                 progress_text.value = message
                 page.update()
 
-            video_path = compose_news_collection_video(selected_news, progress_callback=video_progress_callback)
+            # 传递片头参数给视频合成函数
+            video_path = compose_news_collection_video(
+                selected_news,
+                progress_callback=video_progress_callback,
+                opening_image_path=opening_image_path,
+                opening_audio_path=opening_audio_path,
+                opening_duration=opening_duration
+            )
 
             # 完成
             progress_bar.value = 1.0
             progress_text.value = "✓ 视频生成成功！"
             progress_text.color = ft.Colors.GREEN
 
-            total_duration = sum(news.duration for news in selected_news)
-            video_info_text.value = f"视频路径: {video_path}\n总时长: {total_duration:.1f} 秒"
+            total_duration = sum(news.duration for news in selected_news) + opening_duration
+            video_info_text.value = f"视频路径: {video_path}\n总时长: {total_duration:.1f} 秒（含片头 {opening_duration:.1f} 秒）"
 
         except Exception as ex:
             progress_text.value = f"✗ 生成失败: {ex}"

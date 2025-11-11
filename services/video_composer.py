@@ -11,15 +11,21 @@ from services.sound_effects import ensure_sound_effects
 def compose_news_collection_video(
     news_list: List[NewsItem],
     output_path: str = None,
-    progress_callback: Optional[Callable[[int, int, str], None]] = None
+    progress_callback: Optional[Callable[[int, int, str], None]] = None,
+    opening_image_path: str = None,
+    opening_audio_path: str = None,
+    opening_duration: float = 0
 ) -> str:
     """
-    合成新闻合集视频
+    合成新闻合集视频（支持片头）
 
     Args:
         news_list: 新闻列表（需包含 image_path, audio_path, duration）
         output_path: 输出视频路径（可选）
         progress_callback: 进度回调函数 callback(current, total, message)
+        opening_image_path: 片头图片路径（可选）
+        opening_audio_path: 片头音频路径（可选）
+        opening_duration: 片头时长（可选）
 
     Returns:
         输出视频路径
@@ -52,11 +58,27 @@ def compose_news_collection_video(
 
     clips = []
 
+    # === 添加片头（如果有） ===
+    if opening_image_path and opening_audio_path and opening_duration > 0:
+        if os.path.exists(opening_image_path) and os.path.exists(opening_audio_path):
+            print(f"正在添加片头...")
+            try:
+                opening_clip = ImageClip(opening_image_path, duration=opening_duration)
+                opening_audio = AudioFileClip(opening_audio_path)
+                opening_clip = opening_clip.with_audio(opening_audio)
+                clips.append(opening_clip)
+                print(f"  ✓ 片头已添加（{opening_duration:.1f}秒）")
+            except Exception as e:
+                print(f"  ⚠️ 片头添加失败: {e}")
+
+    # === 添加新闻内容 ===
     for i, news in enumerate(news_list):
         print(f"处理第 {i+1}/{len(news_list)} 条新闻...")
 
         if progress_callback:
-            progress_callback(i, len(news_list) * 2, f"准备视频片段 {i+1}/{len(news_list)}")
+            total_items = len(news_list) * 2 + (1 if opening_image_path else 0)
+            current_item = i + (1 if opening_image_path else 0)
+            progress_callback(current_item, total_items, f"准备视频片段 {i+1}/{len(news_list)}")
 
         try:
             # 加载音频
@@ -119,7 +141,8 @@ def compose_news_collection_video(
     # 拼接所有片段
     print("正在拼接视频片段...")
     if progress_callback:
-        progress_callback(len(news_list), len(news_list) * 2, "正在拼接视频片段...")
+        total_items = len(news_list) * 2 + (1 if opening_image_path else 0)
+        progress_callback(len(news_list) + (1 if opening_image_path else 0), total_items, "正在拼接视频片段...")
 
     final_clip = concatenate_videoclips(clips, method="compose")
 
@@ -128,7 +151,8 @@ def compose_news_collection_video(
 
     # 导出前更新进度
     if progress_callback:
-        progress_callback(len(news_list) + 1, len(news_list) * 2, "正在导出视频... (这可能需要几分钟)")
+        total_items = len(news_list) * 2 + (1 if opening_image_path else 0)
+        progress_callback(len(news_list) + 1 + (1 if opening_image_path else 0), total_items, "正在导出视频... (这可能需要几分钟)")
 
     # 创建一个标志来控制进度更新线程
     export_complete = threading.Event()
@@ -139,11 +163,12 @@ def compose_news_collection_video(
             return
 
         # 预估导出时间（基于视频总时长）
-        total_duration = sum(news.duration for news in news_list)
+        total_duration = sum(news.duration for news in news_list) + opening_duration
         estimated_time = total_duration * 2  # 粗略估计导出时间是视频时长的2倍
 
-        start_step = len(news_list) + 1
-        end_step = len(news_list) * 2
+        total_items = len(news_list) * 2 + (1 if opening_image_path else 0)
+        start_step = len(news_list) + 1 + (1 if opening_image_path else 0)
+        end_step = total_items
         steps = end_step - start_step
 
         elapsed = 0
@@ -155,7 +180,7 @@ def compose_news_collection_video(
             current_step = start_step + int(progress_ratio * steps)
 
             percent = int(progress_ratio * 100)
-            progress_callback(current_step, len(news_list) * 2, f"正在导出视频... {percent}%")
+            progress_callback(current_step, total_items, f"正在导出视频... {percent}%")
 
             if export_complete.wait(update_interval):
                 break
@@ -197,15 +222,17 @@ def compose_news_collection_video(
 
     # 完成后更新进度到 100%
     if progress_callback:
-        progress_callback(len(news_list) * 2, len(news_list) * 2, "视频导出完成！")
+        total_items = len(news_list) * 2 + (1 if opening_image_path else 0)
+        progress_callback(total_items, total_items, "视频导出完成！")
 
     # 清理资源
     for clip in clips:
         clip.close()
     final_clip.close()
 
+    total_video_duration = sum(news.duration for news in news_list) + opening_duration
     print(f"\n✓ 视频生成成功: {output_path}")
-    print(f"  总时长: {sum(news.duration for news in news_list):.1f} 秒")
+    print(f"  总时长: {total_video_duration:.1f} 秒")
 
     return output_path
 
